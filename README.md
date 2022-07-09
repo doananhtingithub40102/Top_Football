@@ -8,15 +8,15 @@ HTML, CSS, Javascript
 ## Hướng dẫn cách chơi
 Sút bóng vào lưới để ghi thật nhiều bàn thắng.
 
-> Hướng bóng
+> **Hướng bóng**
 
 Nhấn ``D`` để sút, đồng thời giữ phím mũi tên ``<-`` để sút bóng về trái và phím ``->`` để sút bóng về phải, nếu không giữ 1 trong 2 phím mũi tên trên bóng sẽ đi thẳng
 
-> Lực bóng
+> **Lực bóng**
 
 Giữ ``D`` càng lâu bóng sẽ bay càng cao. Nếu giữ ``D`` quá lâu (>= 0.45s), bóng sẽ bay lên trời
 
-> Chiến thắng
+> **Chiến thắng**
 
 Sút bóng vào lưới mà thủ môn không thể bắt được sẽ tính 1 điểm thắng
 
