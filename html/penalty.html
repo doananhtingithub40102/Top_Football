@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../img/myIcon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/myStyle.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Top Football - PENALTY</title>
+
+    <script>
+        let ball = {}
+        let footballer = []
+        let goalKeeper = []
+        $.getJSON("../data/penalty.json", function (data) {
+            ball = data.ball[0]
+            footballer = data.footballer["Cristiano Ronaldo"]
+            goalKeeper = data.goalKeeper["De Gea"]
+        });
+        
+        let myStadiumLeft, myStadiumRight, myGoal, myBall, myFootballer, myGoalKeeper, mySoundGoals, mySoundBravo, myScore, myKick, myStreak, centerCircle, centerLine
+        
+        let timeKeepKeyD = 0
+        let highFlightOfBall = 0
+        let y2Ball = 0
+        let isFlightingBall = false
+        let direction = 0
+        let isStatingShoot = false
+        let timeShooting = 0
+        let highOfGoal = 0
+        let numGoals = 0
+        let numKicks = 0
+        let goalscoringStreaks = 0
+        
+        function startGame() {
+            myGameArea.start()
+            myStadiumLeft = new component(150, screen.height, "../img/stadium.png", -80, 0, "image")
+            myStadiumRight = new component(150, screen.height, "../img/stadium.png", screen.width - 70, 0, "image")
+            myGoal = new component(260, 110, "../img/goal.png", 640, 0, "image")
+            myBall = new component(ball.width, ball.height, ball.src, ball.x, ball.y, "image")
+            myFootballer = new component(footballer[0].width, footballer[0].height, footballer[0].src, footballer[0].x, footballer[0].y, "image")
+            myGoalKeeper = new component(goalKeeper[0].width, goalKeeper[0].height, goalKeeper[0].src, goalKeeper[0].x, goalKeeper[0].y, "image")
+            mySoundGoals = new sound("../audio/soundGoals.mp4")
+            mySoundBravo = new sound("../audio/soundBravo.mp4")
+            myScore = new component("20px", "Consolas", "black", 150, 40, "text")
+            myKick = new component("20px", "Consolas", "black", 150, 70, "text")
+            myStreak = new component("20px", "Consolas", "red", 150, 100, "text")
+            centerCircle  = new component(150, 150, "white", screen.width / 2, screen.height - 200, "circle")
+            centerLine = new component(screen.width - 70, screen.height - 200, "white", 70, screen.height - 200, "line")
+        }
+
+        let myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = screen.width
+                this.canvas.height = screen.height
+                this.context = this.canvas.getContext("2d")
+                document.body.insertBefore(this.canvas, document.body.childNodes[0])
+                this.interval = setInterval(updateGameArea, 20)
+                window.addEventListener("keydown", function (e) {
+                    myGameArea.keys = (myGameArea.keys || [])
+                    myGameArea.keys[e.keyCode] = true
+                })
+                window.addEventListener("keyup", function (e) {
+                    myGameArea.keys[e.keyCode] = false
+                })
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+            },
+            stop: function () {
+                clearInterval(this.interval)
+            },
+            restart: function () {
+                setTimeout(function () {
+                    myBall.width = ball.width
+                    myBall.height = ball.height
+                    myBall.speedX = 0
+                    myBall.speedY = 0
+                    myBall.x = ball.x
+                    myBall.y = ball.y
+
+                    myFootballer.width = footballer[0].width
+                    myFootballer.height = footballer[0].height
+                    myFootballer.image.src = footballer[0].src
+                    myFootballer.x = footballer[0].x
+                    myFootballer.y = footballer[0].y
+
+                    myGoalKeeper.width = goalKeeper[0].width
+                    myGoalKeeper.height = goalKeeper[0].height
+                    myGoalKeeper.image.src = goalKeeper[0].src
+                    myGoalKeeper.x = goalKeeper[0].x
+                    myGoalKeeper.y = goalKeeper[0].y
+
+                    timeKeepKeyD = 0
+                    highFlightOfBall = 0
+                    y2Ball = 0
+                    isFlightingBall = false
+                    direction = 0
+                    isStatingShoot = false
+                    timeShooting = 0
+                    highOfGoal = 0
+                    myGameArea.keys = []
+
+                    myGameArea.start()
+                }, 5000)
+
+            }
+        }
+
+        function component(width, height, color, x, y, type) {
+            this.width = width
+            this.height = height
+            this.speedX = 0
+            this.speedY = 0
+            this.x = x
+            this.y = y
+            if (type == "image") {
+                this.image = new Image()
+                this.image.src = color
+            }
+            this.update = function () {
+                ctx = myGameArea.context
+                if (type == "image") {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+                }
+                else if (type == "text") {
+                    ctx.font = this.width + " " + this.height
+                    ctx.fillStyle = color
+                    ctx.fillText(this.text, this.x, this.y)
+                }
+                else if (type == "rect") {
+                    ctx.fillStyle = color
+                    ctx.fillRect(this.x, this.y, this.width, this.height)
+                }
+                else if (type == "circle") {
+                    ctx.beginPath()
+                    ctx.arc(this.x, this.y, this.width || this.height, 0, 2 * Math.PI)
+                    ctx.strokeStyle = color
+                    ctx.stroke()
+                }
+                else if (type == "line") {
+                    ctx.beginPath()
+                    ctx.moveTo(this.x, this.y)
+                    ctx.lineTo(this.width, this.height)
+                    ctx.strokeStyle = color
+                    ctx.stroke()
+                }
+            }
+            this.newPos = function () {
+                this.x += this.speedX
+                this.y += this.speedY
+            }
+            this.crashWith = function (otherComponent) {
+                let myLeft = this.x
+                let myRight = this.x + this.width
+                let myTop = this.y
+                let myBottom = this.y + this.height
+                let otherLeft = otherComponent.x
+                let otherRight = otherComponent.x + otherComponent.width
+                let otherTop = otherComponent.y
+                let otherBottom = otherComponent.y + otherComponent.height
+
+                let isCrash = true
+                if (myBottom < otherTop || myTop > otherBottom || myRight < otherLeft || myLeft > otherRight) {
+                    isCrash = false;
+                }
+
+                return isCrash
+            }
+        }
+
+        function updateGameArea() {
+            myGameArea.clear()
+            myStadiumLeft.update()
+            myStadiumRight.update()
+            myGoal.update()
+            myGoalKeeper.update()
+            centerCircle.update()
+            centerLine.update()
+
+            myBall.speedX = 0
+            myBall.speedY = 0
+            if (myGameArea.keys && myGameArea.keys[68] && !isStatingShoot) {
+                timeKeepKeyD += 0.02
+            }
+            if (myGameArea.keys && myGameArea.keys[68] && myGameArea.keys[37] && !isStatingShoot) {
+                direction = -1
+            }
+            if (myGameArea.keys && myGameArea.keys[68] && myGameArea.keys[39] && !isStatingShoot) {
+                direction = 1
+            }
+
+            if (timeKeepKeyD <= 0.1 && !isStatingShoot) {
+                highFlightOfBall = 108
+                highOfGoal = 1
+            } else if (timeKeepKeyD > 0.1 && timeKeepKeyD <= 0.18 && !isStatingShoot) {
+                highFlightOfBall = 132
+                highOfGoal = 2
+            } else if (timeKeepKeyD > 0.18 && timeKeepKeyD < 0.22 && !isStatingShoot) {
+                highFlightOfBall = 156
+                highOfGoal = 3
+            } else if (timeKeepKeyD > 0.22 && timeKeepKeyD < 0.45 && !isStatingShoot) {
+                highFlightOfBall = 174
+                highOfGoal = 4
+            } else if (timeKeepKeyD >= 0.45 && !isStatingShoot) {
+                highFlightOfBall = 222
+                highOfGoal = 5
+            }
+            if (myGameArea.keys && myGameArea.keys[68] === false) {
+                timeShooting += 0.02
+                if (y2Ball === 0) {
+                    y2Ball = myBall.y - highFlightOfBall
+                    isStatingShoot = true
+                }
+            } else if (isStatingShoot) {
+                timeShooting += 0.02
+            }
+            if (isFlightingBall) {
+                myBall.width -= 0.1
+                myBall.height -= 0.1
+                myBall.speedX = 3.7 * direction
+                myBall.speedY = -6
+            }
+            myBall.newPos()
+            if (myBall.y === y2Ball) {
+                let imgSrc = myGoalKeeper.image.src.replace("http://127.0.0.1:5500/img/", "")
+
+                if ((myBall.crashWith(myGoal) && !myBall.crashWith(myGoalKeeper)) ||
+                    (direction === -1 && ((highOfGoal === 1 && myGoalKeeper.y === 20) || (highOfGoal === 2 && myGoalKeeper.y === 43) || highOfGoal === 3) && imgSrc == "degea_LeftBottom.png") ||
+                    (direction === -1 && highOfGoal === 1 && myGoalKeeper.y === 15 && imgSrc == "degea_LeftTop.png") ||
+                    (direction === 0 && ((highOfGoal === 1 && myGoalKeeper.y === 20) || (highOfGoal === 2 && myGoalKeeper.y === 43) || highOfGoal === 3 || (highOfGoal === 4 && myGoalKeeper.y === 20)) && (imgSrc == "degea_LeftBottom.png" || imgSrc == "degea_RightBottom.png")) ||
+                    (direction === 1 && ((highOfGoal === 1 && myGoalKeeper.y === 20) || (highOfGoal === 2 && myGoalKeeper.y === 43) || highOfGoal === 3) && imgSrc == "degea_RightBottom.png") ||
+                    (direction === 1 && highOfGoal === 1 && myGoalKeeper.y === 15 && imgSrc == "degea_RightTop.png")) {
+                    mySoundGoals.play()
+                    numGoals += 1
+                    goalscoringStreaks += 1
+                } else {
+                    mySoundBravo.play()
+                    goalscoringStreaks = 0
+                }
+
+                numKicks += 1
+                myGameArea.stop()
+                myGameArea.restart()
+            }
+            myBall.update()
+
+            if (timeShooting > 0.49 && timeShooting < 0.52) {
+                myFootballer.image.src = footballer[1].src
+                myFootballer.x = footballer[1].x
+                myFootballer.y = footballer[1].y
+                myFootballer.width = footballer[1].width
+                myFootballer.height = footballer[1].height
+            }
+            if (timeShooting > 0.99 && timeShooting < 1.02) {
+                myFootballer.image.src = footballer[2].src
+                myFootballer.x = footballer[2].x
+                myFootballer.y = footballer[2].y
+                myFootballer.width = footballer[2].width
+                myFootballer.height = footballer[2].height
+            }
+            if (timeShooting > 1.25 && timeShooting < 1.28) {
+                isFlightingBall = true
+
+                let myRand = Math.floor(Math.random() * 9)
+                if (myRand === 0) {
+                    if (direction === 0 && highOfGoal === 4) {
+                        myGoalKeeper.width = goalKeeper[1].width
+                        myGoalKeeper.height = goalKeeper[1].height
+                        myGoalKeeper.image.src = goalKeeper[1].src
+                        myGoalKeeper.y = goalKeeper[1].y
+                    }
+                }
+                if (myRand === 1 || myRand === 2 || myRand === 5 || myRand === 6) {
+                    myGoalKeeper.width = goalKeeper[2].width
+                    myGoalKeeper.height = goalKeeper[2].height
+                }
+                if (myRand === 3 || myRand === 4 || myRand === 7 || myRand === 8) {
+                    myGoalKeeper.width = goalKeeper[4].width
+                }
+                if (myRand === 1 || myRand === 2) {
+                    myGoalKeeper.image.src = goalKeeper[2].src
+                    myGoalKeeper.x = goalKeeper[2].x
+                }
+                if (myRand === 3 || myRand === 4) {
+                    myGoalKeeper.image.src = goalKeeper[4].src
+                }
+                if (myRand === 5 || myRand === 6) {
+                    myGoalKeeper.image.src = goalKeeper[6].src
+                    myGoalKeeper.x = goalKeeper[6].x
+                }
+                if (myRand === 7 || myRand === 8) {
+                    myGoalKeeper.image.src = goalKeeper[8].src
+                }
+                if (myRand === 1 || myRand === 5) {
+                    myGoalKeeper.y = goalKeeper[2].y
+                }
+                if (myRand === 2 || myRand === 6) {
+                    myGoalKeeper.y = goalKeeper[3].y
+                }
+                if (myRand === 4 || myRand === 8) {
+                    myGoalKeeper.y = goalKeeper[5].y
+                }
+                if (myRand === 3) {
+                    myGoalKeeper.x = goalKeeper[4].x
+                }
+                if (myRand === 4) {
+                    myGoalKeeper.x = goalKeeper[5].x
+                }
+                if (myRand === 7) {
+                    myGoalKeeper.x = goalKeeper[8].x
+                }
+                if (myRand === 8) {
+                    myGoalKeeper.x = goalKeeper[9].x
+                }
+            }
+            myFootballer.update()
+
+            myScore.text = "GOALS: " + numGoals
+            myScore.update()
+            myKick.text = "KICKS: " + numKicks
+            myKick.update()
+            if (goalscoringStreaks === 0) {
+                myStreak.text = ""
+            } else {
+                if (goalscoringStreaks === 1) {
+                    myStreak.text = "GOAL!"
+                } else if (goalscoringStreaks === 2) {
+                    myStreak.text = "DOUBLE KICK!"
+                } else if (goalscoringStreaks === 3) {
+                    myStreak.text = "HAT-TRICK!"
+                } else if (goalscoringStreaks === 4) {
+                    myStreak.text = "POKER!"
+                } else if (goalscoringStreaks === 5) {
+                    myStreak.text = "REPOKER!"
+                } else if (goalscoringStreaks === 6) {
+                    myStreak.text = "DOUBLE HAT-TRICK!"
+                } else if (goalscoringStreaks === 7) {
+                    myStreak.text = "HAUL-TRICK!"
+                } else if (goalscoringStreaks === 8) {
+                    myStreak.text = "SNOWMAN!"
+                } else {
+                    myStreak.text = goalscoringStreaks + "!"
+                }
+            }
+            myStreak.update()
+        }
+
+        function sound(src) {
+            this.sound = document.createElement("audio")
+            this.sound.src = src
+            this.sound.setAttribute("preload", "auto")
+            this.sound.setAttribute("controls", "none")
+            this.sound.style.display = "none"
+            document.body.appendChild(this.sound)
+            this.play = function () {
+                this.sound.play()
+            }
+            this.stop = function () {
+                this.sound.pause()
+            }
+        }
+    </script>
+</head>
+
+<body onload="startGame()">
+
+</body>
+
+</html>

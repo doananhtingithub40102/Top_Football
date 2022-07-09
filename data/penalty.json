@@ -1,0 +1,26 @@
+{
+    "ball": [
+        {"src": "../img/ball.png", "width": 15, "height": 15, "x": 765, "y": 190}
+    ],
+    "footballer": {
+        "Cristiano Ronaldo": [
+            {"src": "../img/cr7_penalty.png", "width": 40, "height": 95, "x": 710, "y": 180},
+            {"src": "../img/cr7_penalty2.png", "width": 35, "height": 85, "x": 715, "y": 180},
+            {"src": "../img/cr7_penalty3.png", "width": 75, "height": 75, "x": 705, "y": 145}
+        ]
+    },
+    "goalKeeper": {
+        "De Gea": [
+            {"src": "../img/degea.png", "width": 40, "height": 75, "x": 750, "y": 35},
+            {"src": "../img/degea_CenterTop.png", "width": 38, "height": 83, "x": 750, "y": 15},
+            {"src": "../img/degea_LeftBottom.png", "width": 110, "height": 65, "x": 685, "y": 43},
+            {"src": "../img/degea_LeftBottom.png", "width": 110, "height": 65, "x": 680, "y": 20},
+            {"src": "../img/degea_LeftTop.png", "width": 70, "height": 75, "x": 670, "y": 35},
+            {"src": "../img/degea_LeftTop.png", "width": 70, "height": 75, "x": 660, "y": 15},
+            {"src": "../img/degea_RightBottom.png", "width": 110, "height": 65, "x": 748, "y": 43},
+            {"src": "../img/degea_RightBottom.png", "width": 110, "height": 65, "x": 745, "y": 20},
+            {"src": "../img/degea_RightTop.png", "width": 70, "height": 75, "x": 800, "y": 35},
+            {"src": "../img/degea_RightTop.png", "width": 70, "height": 75, "x": 810, "y": 15}
+        ]
+    }
+}

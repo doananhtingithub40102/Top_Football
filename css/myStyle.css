@@ -1,0 +1,10 @@
+body {
+    overflow: hidden;
+}
+
+canvas {
+    border: 1px solid #d3d3d3;
+    background-color: red;
+    /* For browsers that do not support gradients */
+    background-image: repeating-linear-gradient(#4fb018 0px, #4fb018 30px, #4fb018 30px, #41a01d 30px, #41a01d 60px);
+}
